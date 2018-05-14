@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="shortcut icon" href="src/favicon.ico" />
+<link rel="Bookmark" href="src/favicon.ico" />
+<!-- Main Quill library -->
+<script src="src/jquery.min.js"></script>
+<script src="src/quill.min.js"></script>
+
+<!-- Theme included stylesheets -->
+<link href="src/quill.snow.css" rel="stylesheet">
+<style type="text/css">
+* {
+    box-sizing: border-box;
+    font-family: arial;
+}
+
+h1 {
+    font-size: 22px;
+}
+
+.help {
+    display: block;
+    width: 800px;
+    margin: 0 auto;
+    padding: 5px 0 20px 0;
+}
+
+#copyButton {
+    padding: 10px;
+}
+
+/* Create three equal columns that floats next to each other */
+.column {
+    float: left;
+    width: 33.33%;
+    padding: 10px;
+    /*height: 350px;*/
+}
+
+/* Clear floats after the columns */
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+#info {
+    text-align: center;
+    font-family: helvetica;
+}
+
+#character {
+    color: #933;
+}
+
+#info span {
+    font-size: 18px;
+}
+
+
+
+#convert {
+    padding: 10px;
+    margin: 10px;
+}
+#editor {
+    height: 300px;
+}
+.outcome {
+    font-family: arial;
+    background-color: #efeffa;
+    padding: 10px 0px;
+    font-size: 11.5px;
+}
+
+
+
+#stEditor {
+    border: solid 1px #aaa;
+    width: 500px;
+    height:200px;
+    outline: none;
+}
+#stResult {
+    border: solid 1px #efeffa;
+    width: 500px;
+    height:200px; 
+    outline: none;
+}
+textarea {
+    overflow: scroll;
+}
+
+#stBytes {
+    color: #199399;
+}
+
+
+</style>
+<title>HTML CONVERTER - Designed by Michael Tan in April 2018 - 内部工具，请勿外传</title>
+</head>
+<body>
+<h1>TEXT TO HTML CONVERTOR (Product Description)</h1>
+    <ul>
+        <li>粘贴带格式文本到左框，生成HTML代码于中框，右框呈现代码的实际效果。亚马逊不允许的格式会被忽略。</li>
+        <li>如有异常，请切换谷歌浏览器使用。</li>
+        <li>遇到其他问题，可以 <a href="https://github.com/mtpy18/gakkit/issues" target="_blank">到这里提交 issue</a>。</li>
+    </ul>
+
+<div id="info">
+    <span>Character Number of HTML Code: </span><span id="character"></span>
+    <br>
+    <span><button id="copyButton">复制代码 | Copy code</button></span><span id="copySuccess" style="display:none; color: red;"></span>
+</div>
+<div class="row">
+  <div class="column" style="background-color:#fff;">
+    <div id="toolbar">
+      <!-- Add buttons as you would before -->
+      <button class="ql-bold"></button>
+      <button class="ql-italic"></button>
+
+      <!-- But you can also add your own -->
+      <button id="custom-button">清</button>
+    </div>
+    <div id='editor'></div>
+  </div>
+  <div class="column" style="background-color:#fff;">
+    <div id='outText' class="outcome"></div>
+  </div>
+  <div class="column" style="background-color:#fff;">
+    <div id='outHTML' class="outcome"></div>
+  </div>
+</div>
+
+<div style="display: none;" id="invisible"></div>
+
+
+<h1 title="Designed by Michael Tan">De-duplication and byte count (Search Terms)</h1>
+<p>粘贴关键词到第一个框中，会自动去除重复关键词，并计算字节数（经亚马逊客服确认，空格也会计算）。</p>
+<p id="hint">The total bytes: <span id="stBytes">0</span> (must &lt; 250, 日本<500)</p>
+<textarea class="stContent" id="stEditor" ></textarea>
+<br>
+<textarea class="stContent" id="stResult" ></textarea>
+
+<script>
+var toolbarOptions = ['bold', 'italic', 'clean'];
+var quill = new Quill('#editor', {
+theme: 'snow',
+    modules: {
+        // toolbar: toolbarOptions
+        toolbar: '#toolbar'
+    }
+});
+
+var customButton = document.querySelector('#custom-button');
+customButton.addEventListener('click', function() {
+  var range = quill.getSelection();
+  if (range) {
+    quill.setContents('');
+  }
+});
+
+quill.on('text-change', function(delta, oldDelta, source) {
+
+    var delta = quill.getContents();
+    raw_html = quillGetHTML(delta);
+
+    $('#invisible').html(raw_html);
+    $('#invisible *').removeAttr('style');
+    $('#invisible *').removeAttr('class');
+    raw_html = $('#invisible').html();
+
+    // 字符处理
+    // 彻底去掉某种标签
+    raw_html = raw_html.replace(/<\/*span>/g, '');
+    raw_html = raw_html.replace(/<\/*li>/g, '');
+    raw_html = raw_html.replace(/<\/*ol>/g, '');
+    raw_html = raw_html.replace(/<\/*ul>/g, '');
+    raw_html = raw_html.replace(/<\/*u>/g, '');
+    
+    raw_html = raw_html.replace(/<img.*?>/g, '');
+    raw_html = raw_html.replace(/<a.*?>/g, '');
+
+
+    raw_html = raw_html.replace(/<h.*?>/g, '');
+    raw_html = raw_html.replace(/<\/h.*?>/g, '<br>');
+
+    raw_html = raw_html.replace(/&amp;/g, '&');
+    raw_html = raw_html.replace(/&nbsp;/g, ' ');
+    raw_html = raw_html.replace(/[‘’]/g, "'");
+    raw_html = raw_html.replace(/[“”]/g, '"');
+    raw_html = raw_html.replace(/（/g, "(");
+    raw_html = raw_html.replace(/）/g, ")");
+    raw_html = raw_html.replace(/。/g, ".");
+    raw_html = raw_html.replace(/，/g, ",");
+    
+
+    raw_html = raw_html.replace(/<strong>/g, '<b>');
+    raw_html = raw_html.replace(/<\/strong>/g, '</b>');
+    raw_html = raw_html.replace(/<\/p><p><br><\/p><p>/g, '<br><br>');
+    raw_html = raw_html.replace(/<\/p><p>/g, '<br>');
+    raw_html = raw_html.replace(/^<p>/, '');
+    raw_html = raw_html.replace(/<\/p>$/, '');
+    raw_html = raw_html.replace(/^(<br>)+/, '');
+    raw_html = raw_html.replace(/(<br>)+$/, '');
+    // console.log(typeof(raw_html));
+
+    $('#outText').text(raw_html);
+    $('#outHTML').html(raw_html);
+
+    var length = $('#outHTML').html().length;
+    $('#character').text(length);
+
+  });
+
+
+function quillGetHTML(inputDelta) {
+    var tempCont = document.createElement("div");
+    (new Quill(tempCont)).setContents(inputDelta);
+    return tempCont.getElementsByClassName("ql-editor")[0].innerHTML;
+}
+</script>
+<!-- #################################################################### -->
+<!-- #################################################################### -->
+<!-- #################################################################### -->
+<!-- #################################################################### -->
+<!-- #################################################################### -->
+<script>
+
+function byteSize(s){return unescape(encodeURI(s)).length};
+
+function exceedByteLimit(n) {
+    if (n >= 250) {
+        return '<span style="color: #e33;"></span>'
+    }
+}
+
+$(function() {
+    $("#copyButton").click(function () {
+         var htmlCode = $('#outText');
+         if (htmlCode.text().length!=0) {
+             copyToClipboard(htmlCode);
+             $("#copySuccess").text(' Successful!');
+             $("#copySuccess").show();
+         } else {
+            $("#copySuccess").text(' No content!');
+            $("#copySuccess").show();
+         }
+    });
+
+
+    $("#stEditor").bind("input propertychange change", function() {
+        // 搜集整理词语的时候不考虑空格，只对最终结果的空格进行计数
+        var raw = $("#stEditor").val().toLowerCase().replace(/\s+/g, ' ').split(' ');
+        console.log(raw);
+        var cooked = [];
+        for (i in raw) {
+            if ($.inArray(raw[i], cooked)==-1) {
+                cooked.push(raw[i]);
+            }
+        }
+        $("#stResult").val(cooked.join(' '));
+        var s = $("#stResult").val().replace(/[\n\r]+/g, '').trim();
+        var size = byteSize(s);
+        $('#stBytes').html(size);
+    });
+
+    // 直接改变结果时，计数器数值也会变化。
+    $("#stResult").bind('input propertychange change', function() {
+        var s = $(this).val().replace(/[\n\r]+/g, '').trim();
+        var size = byteSize(s);
+        $("#stBytes").html(size);
+    });
+});
+
+//SOURCE: https://stackoverflow.com/questions/22581345/click-button-copy-to-clipboard-using-jquery
+function copyToClipboard(element) {
+    var $temp = $("<input>");
+    $("body").append($temp);
+    $temp.val($(element).text()).select();
+    document.execCommand("copy");
+    $temp.remove();
+}
+</script>
+</body>
+</html>
