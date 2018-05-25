@@ -67,7 +67,7 @@ h1 {
     margin: 10px;
 }
 #editor {
-    height: 300px;
+    height: 250px;
 }
 .outcome {
     font-family: arial;
@@ -100,20 +100,18 @@ textarea {
 
 
 </style>
-<title>HTML CONVERTER - Designed by Michael Tan in April 2018 - 内部工具，请勿外传</title>
+<title>HTML CONVERTER - Designed by Michael Tan in April 2018</title>
 </head>
 <body>
-<h1>TEXT TO HTML CONVERTOR (Product Description)</h1>
+<h1>Product Description HTML 生成</h1>
     <ul>
-        <li>粘贴带格式文本到左框，生成HTML代码于中框，右框呈现代码的实际效果。亚马逊不允许的格式会被忽略。</li>
-        <li>如有异常，请切换谷歌浏览器使用。</li>
-        <li>遇到其他问题，可以 <a href="https://github.com/mtpy18/gakkit/issues" target="_blank">到这里提交 issue</a>。</li>
+        <li>粘贴带格式文本到左框，生成HTML代码于中框，右框呈现代码的实际效果。亚马逊不允许的格式会被忽略。如有异常，请切换谷歌浏览器使用。</li>
+        <li>遇到其他问题，可以 <a href="https://github.com/mtpy18/gakkit/issues" target="_blank">到这里提交 issue</a>。对你有帮助请<a href="https://github.com/ruxtain/gakkit" target="_blank">点星星支持一下</a>咯。</li>
     </ul>
 
 <div id="info">
-    <span>Character Number of HTML Code: </span><span id="character"></span>
-    <br>
-    <span><button id="copyButton">复制代码 | Copy code</button></span><span id="copySuccess" style="display:none; color: red;"></span>
+    <span>HTML 代码总字符数: </span><span id="character"></span>
+    <span><button id="copyButton">复制代码</button></span><span id="copySuccess" style="display:none; color: red;"></span>
 </div>
 <div class="row">
   <div class="column" style="background-color:#fff;">
@@ -138,11 +136,10 @@ textarea {
 <div style="display: none;" id="invisible"></div>
 
 
-<h1 title="Designed by Michael Tan">De-duplication and byte count (Search Terms)</h1>
-<p>粘贴关键词到第一个框中，会自动去除重复关键词，并计算字节数（经亚马逊客服确认，空格也会计算）。</p>
+<h1 title="Designed by Michael Tan">Search Terms 去重并计算字节数</h1>
+<p>粘贴关键词到第左边框中，会自动去除重复关键词，并计算字节数（经亚马逊客服确认，空格也会计算）。</p>
 <p id="hint">The total bytes: <span id="stBytes">0</span> (must &lt; 250, 日本<500)</p>
 <textarea class="stContent" id="stEditor" ></textarea>
-<br>
 <textarea class="stContent" id="stResult" ></textarea>
 
 <script>
